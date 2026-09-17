@@ -26,8 +26,8 @@ npm run build   # production build
 
 ## Before public launch
 
-- Replace the placeholder `SUPPORT_EMAIL` in `components/Footer.tsx` with the
-  real support inbox (it is re-used by all three legal pages).
+- Confirm incoming mail reaches `support@lodgetrack.com`, the support inbox
+  shared by the footer and all three legal pages.
 - Replace the placeholder terms and privacy text in `app/terms`, `app/privacy`
   with reviewed legal copy.
 - Re-introduce the application (dashboard, auth, database, billing) — it was

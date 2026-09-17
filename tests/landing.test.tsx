@@ -22,6 +22,22 @@ test("footer navigation points to legal pages instead of empty anchors", () => {
   assert.doesNotMatch(footer, /href="#"/);
 });
 
+test("image-backed sections contain their negative background layers", () => {
+  for (const id of ["hero", "features", "about"]) {
+    const section = html.match(new RegExp(`<section id="${id}" class="([^"]+)"`));
+    assert.ok(section, `expected ${id} section`);
+    assert.ok(section[1].split(" ").includes("isolate"), `${id} must isolate its background layers`);
+  }
+});
+
+test("footer content stays centered across breakpoints", () => {
+  const footer = html.match(/<footer\b[\s\S]*?<\/footer>/)?.[0];
+  assert.ok(footer);
+  assert.match(footer, /<footer class="[^"]*\btext-center\b/);
+  assert.match(footer, /md:grid-cols-3/);
+  assert.doesNotMatch(footer, /lg:grid-cols-6|justify-between|md:flex-row/);
+});
+
 test("launch status and product previews are visible together", () => {
   assert.match(html, /Work in Progress/);
   assert.match(html, /under active development/);

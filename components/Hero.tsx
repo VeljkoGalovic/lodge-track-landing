@@ -5,7 +5,7 @@ import { ArrowRight, Calendar, DollarSign } from "lucide-react";
 
 export function Hero() {
   return (
-    <section id="hero" className="relative py-16 md:py-24 lg:min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="hero" className="relative isolate py-16 md:py-24 lg:min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background image & deep dark gradient overlay */}
       <div className="absolute inset-0 -z-20">
         <Image

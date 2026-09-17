@@ -26,8 +26,7 @@ function LinkedInIcon({ size = 15 }: { size?: number }) {
 }
 
 /**
- * Placeholder support address — replace with the real inbox before going live.
- * It is a single constant so the footer and the legal pages stay in sync.
+ * Shared support inbox for the footer and the legal pages.
  */
 export const SUPPORT_EMAIL = "support@lodgetrack.com";
 
@@ -58,12 +57,12 @@ const socials = [
 
 export function Footer() {
   return (
-    <footer className="relative bg-[#07090E] border-t border-white/[0.06]">
+    <footer className="relative bg-[#07090E] border-t border-white/[0.06] text-center">
       <div className="container mx-auto px-6 md:px-10 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl mx-auto">
           {/* Brand */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-5">
+          <div>
+            <div className="flex items-center justify-center gap-3 mb-5">
               <Image
                 src="/images/logo/LogoNoBG.png"
                 alt="LodgeTrack logo"
@@ -75,12 +74,12 @@ export function Footer() {
                 Lodge<span className="text-[#36BFAE]">Track</span>
               </span>
             </div>
-            <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-xs">
+            <p className="text-sm text-slate-400 leading-relaxed mb-6 max-w-xs mx-auto">
               Cutting-edge software to manage properties, bookings, and revenue
               in one unified platform. Built for small to medium rental
               businesses.
             </p>
-            <div className="flex items-center gap-2 text-xs text-[#36BFAE]">
+            <div className="flex items-center justify-center gap-2 text-xs text-[#36BFAE]">
               <Activity size={13} />
               <span className="inline-flex items-center gap-1.5">
                 <span className="relative flex h-2 w-2">
@@ -121,7 +120,7 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-14 pt-8 border-t border-white/[0.06] flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-14 pt-8 border-t border-white/[0.06] flex flex-col items-center justify-center gap-4">
           <p className="text-xs text-slate-500">
             © 2026 LodgeTrack by Veljko Galović. All rights reserved.
           </p>
