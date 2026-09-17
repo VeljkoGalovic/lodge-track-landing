@@ -1,5 +1,4 @@
-import { LOCALE_COOKIE } from "@/lib/i18n/server"
-import { THEME_COOKIE } from "@/lib/theme"
+import { LOCALE_COOKIE, THEME_COOKIE } from "@/lib/preferences"
 
 /**
  * Stamps the member's saved theme and language onto `<html>` before first paint.
