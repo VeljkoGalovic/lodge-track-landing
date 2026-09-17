@@ -38,6 +38,14 @@ test("footer content stays centered across breakpoints", () => {
   assert.doesNotMatch(footer, /lg:grid-cols-6|justify-between|md:flex-row/);
 });
 
+test("header centers desktop navigation without sign-in text", () => {
+  const header = html.match(/<header\b[\s\S]*?<\/header>/)?.[0];
+  assert.ok(header);
+  assert.doesNotMatch(header, /sign in/i);
+  assert.match(header, /md:grid-cols-\[1fr_auto_1fr\]/);
+  assert.match(header, /md:justify-self-end/);
+});
+
 test("launch status and product previews are visible together", () => {
   assert.match(html, /Work in Progress/);
   assert.match(html, /under active development/);

@@ -16,9 +16,9 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 h-16 bg-[#07090E]/80 backdrop-blur-xl border-b border-white/[0.06]">
+    <header className="fixed top-0 left-0 right-0 z-50 flex md:grid md:grid-cols-[1fr_auto_1fr] items-center justify-between px-6 md:px-10 h-16 bg-[#07090E]/80 backdrop-blur-xl border-b border-white/[0.06]">
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-2.5 shrink-0">
+      <Link href="/" className="flex items-center gap-2.5 shrink-0 md:justify-self-start">
         <Image
           src="/images/logo/LogoNoBG.png"
           alt="LodgeTrack logo"
@@ -45,10 +45,7 @@ export function Navbar() {
       </nav>
 
       {/* Desktop CTA — disabled while the product is in pre-launch */}
-      <div className="hidden md:flex items-center gap-3">
-        <span className="text-sm font-medium text-slate-500 px-3 select-none">
-          Sign in
-        </span>
+      <div className="hidden md:flex items-center md:justify-self-end">
         <Button variant="glass" disabled className="text-sm px-5 py-2 h-9">
           Launching soon
         </Button>
@@ -78,9 +75,6 @@ export function Navbar() {
             </a>
           ))}
           <div className="flex flex-col gap-3 pt-2">
-            <span className="text-sm text-slate-500 text-center py-2 select-none">
-              Sign in unavailable during pre-launch
-            </span>
             <Button
               variant="glass"
               disabled
