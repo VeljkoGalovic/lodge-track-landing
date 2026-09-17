@@ -1,28 +1,14 @@
-import type { ThemePreference as SchemaThemePreference } from "@prisma/client"
-
 /**
- * Theme preference: what the member *chose*, not what is currently painted.
+ * Theme preference: what the visitor *chose*, not what is currently painted.
  *
- * Kept as a hand-written union rather than re-exporting the Prisma enum because
- * this module is read by client components, and a value import from
- * `@prisma/client` would drag the Prisma runtime across the boundary. The enum
- * in prisma/schema.prisma mirrors these three names; `ThemeMatchesSchema` below
- * makes the compiler complain if the two ever drift apart.
+ * The application this token layer once served has been stripped for the
+ * pre-launch site; the marketing pages are a fixed dark brand experience, so
+ * this file now only carries the cookie name the boot script reads and clears.
+ * The enum that lived in prisma/schema.prisma is gone with the database.
  */
 export const THEMES = ["SYSTEM", "LIGHT", "DARK"] as const
 
 export type ThemePreference = (typeof THEMES)[number]
-
-/**
- * Compile-time guard that the union above and the database enum agree.
- *
- * Exported only so `no-unused-vars` doesn't flag it — it exists to be *written*,
- * not read. If someone adds a theme to the schema and not here (or vice versa),
- * this resolves to `never` and the build fails at this line rather than at
- * runtime, where the failure would be a preference that silently fails to save.
- */
-type AssertSame<A, B> = [A] extends [B] ? ([B] extends [A] ? true : never) : never
-export type ThemeMatchesSchema = AssertSame<ThemePreference, SchemaThemePreference>
 
 /** Holds the member's choice between requests. Not a secret, so not httpOnly. */
 export const THEME_COOKIE = "lodgetrack_theme"
@@ -30,7 +16,7 @@ export const THEME_COOKIE = "lodgetrack_theme"
 /**
  * Readable by the blocking script in the document head, which is the whole point
  * — the theme has to be applied before the first paint, and a script cannot read
- * an httpOnly cookie. `sameSite: "lax"` keeps it off cross-site form posts.
+ * an httpOnly cookie.
  */
 export const THEME_COOKIE_OPTIONS = {
   path: "/",

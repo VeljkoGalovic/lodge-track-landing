@@ -17,16 +17,17 @@ export function CtaBanner() {
               Ready to streamline your <span className="text-gradient-teal">rental workflow</span>?
             </h3>
             <p className="text-slate-300 text-base md:text-lg">
-              Join modern operators scaling their portfolios efficiently. No credit card required to start your 14-day trial.
+              LodgeTrack is under active development — the dashboard you see below is a preview built with sample data. Public launch is coming soon.
             </p>
           </div>
 
           <div className="shrink-0">
             <Button
               variant="primary"
+              disabled
               className="gap-2 px-8 py-4 text-base shadow-[0_0_30px_rgba(54,191,174,0.3)] hover:shadow-[0_0_40px_rgba(54,191,174,0.5)]"
             >
-              Start free trial <ArrowRight size={18} />
+              Launching soon <ArrowRight size={18} />
             </Button>
           </div>
 

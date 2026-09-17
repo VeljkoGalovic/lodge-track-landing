@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Check } from "lucide-react";
 import { clsx } from "clsx";
@@ -10,7 +9,6 @@ interface PricingTier {
   period: string;
   description: string;
   features: string[];
-  cta: string;
   featured: boolean;
 }
 
@@ -27,7 +25,6 @@ const TIERS: PricingTier[] = [
       "Basic revenue reports",
       "Email support",
     ],
-    cta: "Start free trial",
     featured: false,
   },
   {
@@ -43,7 +40,6 @@ const TIERS: PricingTier[] = [
       "Data import & export",
       "Priority support",
     ],
-    cta: "Get started",
     featured: true,
   },
   {
@@ -59,7 +55,6 @@ const TIERS: PricingTier[] = [
       "SSO and role-based access",
       "99.9% uptime SLA",
     ],
-    cta: "Contact sales",
     featured: false,
   },
 ];
@@ -105,8 +100,9 @@ function PricingCard({ tier }: { tier: PricingTier }) {
       <Button
         variant={tier.featured ? "primary" : "glass"}
         className="w-full text-base py-3"
+        disabled
       >
-        {tier.cta}
+        Launching soon
       </Button>
     </div>
   );
@@ -135,6 +131,9 @@ export function Pricing() {
             </h2>
             <p className="text-slate-300 text-base md:text-lg">
               Transparent plans designed to scale alongside your property portfolio.
+            </p>
+            <p className="text-xs md:text-sm text-[#BA87FF] font-medium">
+              All plans and prices are subject to change prior to public launch.
             </p>
           </div>
 

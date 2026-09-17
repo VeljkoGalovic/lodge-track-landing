@@ -25,22 +25,28 @@ function LinkedInIcon({ size = 15 }: { size?: number }) {
   );
 }
 
+/**
+ * Placeholder support address — replace with the real inbox before going live.
+ * It is a single constant so the footer and the legal pages stay in sync.
+ */
+export const SUPPORT_EMAIL = "support@lodgetrack.com";
+
 const columns = [
   {
     title: "Product",
-    links: ["Features", "Calendar", "Financials", "Integrations"],
-  },
-  {
-    title: "Company",
-    links: ["About Us", "Roadmap", "Careers"],
-  },
-  {
-    title: "Resources",
-    links: ["Help Center", "Documentation", "Blog"],
+    links: [
+      { label: "Features", href: "#features" },
+      { label: "Pricing", href: "#pricing" },
+      { label: "About", href: "#about" },
+    ],
   },
   {
     title: "Legal",
-    links: ["Privacy Policy", "Terms of Service", "Security"],
+    links: [
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Service", href: "/terms" },
+      { label: "Contact & Support", href: "/contact" },
+    ],
   },
 ];
 
@@ -81,9 +87,15 @@ export function Footer() {
                   <span className="absolute inline-flex h-full w-full rounded-full bg-[#36BFAE] opacity-75 animate-ping" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#36BFAE]" />
                 </span>
-                All systems operational
+                Work in progress — launching soon
               </span>
             </div>
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              className="block text-sm text-slate-400 hover:text-[#36BFAE] transition-colors mt-3"
+            >
+              {SUPPORT_EMAIL}
+            </a>
           </div>
 
           {/* Link columns */}
@@ -94,12 +106,12 @@ export function Footer() {
               </h3>
               <ul className="space-y-3">
                 {column.links.map((link) => (
-                  <li key={link}>
+                  <li key={link.label}>
                     <a
-                      href="#"
+                      href={link.href}
                       className="text-sm text-slate-400 hover:text-[#36BFAE] transition-colors"
                     >
-                      {link}
+                      {link.label}
                     </a>
                   </li>
                 ))}

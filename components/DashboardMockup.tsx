@@ -25,7 +25,7 @@ export function DashboardMockup() {
           <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/60" />
           <span className="h-2.5 w-2.5 rounded-full bg-green-500/60" />
           <span className="ml-3 text-xs text-slate-500 font-medium">
-            LodgeTrack — Dashboard
+            LodgeTrack — Dashboard (sample data)
           </span>
         </div>
 

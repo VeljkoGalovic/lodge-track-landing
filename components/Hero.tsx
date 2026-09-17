@@ -32,17 +32,24 @@ export function Hero() {
               <span className="text-xs font-medium text-slate-300">Next-Gen Property Operations</span>
             </div>
 
+            {/* Pre-launch status — replaces the previous "launching" framing while
+                the product is still under active development. */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#BA87FF]/10 border border-[#BA87FF]/30 backdrop-blur-md w-fit">
+              <span aria-hidden="true">🚧</span>
+              <span className="text-xs font-medium text-[#D6B7FF]">Work in Progress • Launching Soon</span>
+            </div>
+
             <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-white leading-[1.15] sm:leading-[1.1]">
-              Scale your rental business without the <span className="text-gradient-teal">operational chaos</span>
+              LodgeTrack is <span className="text-gradient-teal">under active development</span> — the platform that scales your rental business
             </h1>
 
             <p className="text-slate-300 text-base sm:text-lg md:text-xl max-w-2xl leading-relaxed">
-              Manage properties, automated bookings, and unified revenue streams from a single, high-performance platform built for modern operators.
+              Manage properties, automated bookings, and unified revenue streams from a single, high-performance platform built for modern operators. <span className="text-[#36BFAE]">Public launch is coming soon.</span>
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
-              <Button variant="primary" className="gap-2 px-6 py-3.5 sm:py-4 text-base justify-center">
-                Get started for free <ArrowRight size={18} />
+              <Button variant="primary" disabled className="gap-2 px-6 py-3.5 sm:py-4 text-base justify-center">
+                Launching soon <ArrowRight size={18} />
               </Button>
               <Button variant="glass" href="#features" className="px-6 py-3.5 sm:py-4 text-base justify-center">
                 Explore the platform

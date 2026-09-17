@@ -44,16 +44,13 @@ export function Navbar() {
         ))}
       </nav>
 
-      {/* Desktop CTA */}
+      {/* Desktop CTA — disabled while the product is in pre-launch */}
       <div className="hidden md:flex items-center gap-3">
-        <Link
-          href="/signin"
-          className="text-sm font-medium text-slate-400 hover:text-white transition-colors px-3"
-        >
+        <span className="text-sm font-medium text-slate-500 px-3 select-none">
           Sign in
-        </Link>
-        <Button variant="glass" href="/register" className="text-sm px-5 py-2 h-9">
-          Sign up
+        </span>
+        <Button variant="glass" disabled className="text-sm px-5 py-2 h-9">
+          Launching soon
         </Button>
       </div>
 
@@ -81,20 +78,15 @@ export function Navbar() {
             </a>
           ))}
           <div className="flex flex-col gap-3 pt-2">
-            <Link
-              href="/signin"
-              onClick={() => setOpen(false)}
-              className="text-sm text-slate-400 hover:text-white text-center py-2"
-            >
-              Sign in
-            </Link>
+            <span className="text-sm text-slate-500 text-center py-2 select-none">
+              Sign in unavailable during pre-launch
+            </span>
             <Button
               variant="glass"
-              href="/register"
+              disabled
               className="text-sm w-full"
-              onClick={() => setOpen(false)}
             >
-              Sign up
+              Launching soon
             </Button>
           </div>
         </div>

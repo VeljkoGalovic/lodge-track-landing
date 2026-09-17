@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LodgeTrack — pre-launch landing page
 
-## Getting Started
+This repository currently hosts a static "Work in Progress / Launching Soon"
+page for LodgeTrack, built with Next.js (App Router)
+and Tailwind CSS. It exists so the domain can pass merchant verification while
+the product is still under active development.
 
-First, run the development server:
+The page deliberately shows what the product will do — features, pricing
+preview, and a dashboard mockup built with sample data — while making three
+things unmistakable to a reviewer:
+
+- no accounts can be created and no purchases can be made yet (every CTA is
+  disabled);
+- the pricing shown is illustrative and subject to change before launch;
+- there is a real way to reach us: the footer and the `/contact`,
+  `/terms`, and `/privacy` pages all point at a support inbox.
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # http://localhost:3000
+npm run test    # server-rendered assertions for the pre-launch contract
+npm run build   # production build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Before public launch
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Replace the placeholder `SUPPORT_EMAIL` in `components/Footer.tsx` with the
+  real support inbox (it is re-used by all three legal pages).
+- Replace the placeholder terms and privacy text in `app/terms`, `app/privacy`
+  with reviewed legal copy.
+- Re-introduce the application (dashboard, auth, database, billing) — it was
+  removed from this temporary page and can be recovered from the initial
+  commit (`24b6dcb`).
