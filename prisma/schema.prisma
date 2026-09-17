@@ -1,0 +1,344 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  OWNER
+  MANAGER
+  MAINTENANCE
+}
+
+enum SubscriptionTier {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+  /// Lemon Squeezy reports `paused` distinctly from `cancelled`; a paused
+  /// subscription keeps its data and can resume, so it is not folded into
+  /// CANCELED.
+  PAUSED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+/**
+ * What an expense was for. A closed enum rather than free text so the expense
+ * list can group and total by category without the totals fragmenting across
+ * "utilities", "Utilities" and "utility".
+ */
+enum ExpenseCategory {
+  MAINTENANCE
+  UTILITIES
+  SUPPLIES
+  CLEANING
+  TAXES
+  INSURANCE
+  OTHER
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  /**
+   * ISO 4217 code for every monetary amount in this organization. Bookings
+   * store minor units (cents) with no currency of their own, so this is the
+   * single place the app decides how to render them.
+   */
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Multi-tenancy relations
+  users        User[]
+  properties   Property[]
+  units        PropertyUnit[]
+  expenses     Expense[]
+  subscription Subscription?
+  invitations  Invitation[]
+}
+
+/**
+ * The member's interface theme.
+ *
+ * `SYSTEM` is a real third state, not a synonym for one of the others: it means
+ * "follow the operating system", which is a preference the browser has to be
+ * asked about at render time. Storing it lets a member choose a theme on a phone
+ * set to light and have it stay light, while a second member on the same
+ * database keeps following their own system.
+ */
+enum ThemePreference {
+  SYSTEM
+  LIGHT
+  DARK
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String?
+  email        String        @unique
+  passwordHash String?
+  role         Role          @default(OWNER)
+
+  /**
+   * Interface language (ISO 639-1). Stored per member rather than per
+   * organization: two people in one organization can read different languages,
+   * and nothing about this app's data is language-specific.
+   *
+   * Deliberately a plain String, not an enum. The set of languages is a product
+   * decision that changes far more often than the set of booking statuses, and an
+   * enum would make each new language a database migration. The accepted values
+   * live in lib/i18n/locales.ts, which is the only thing that reads this field.
+   */
+  locale       String        @default("en")
+  theme        ThemePreference @default(SYSTEM)
+
+  /**
+   * TOTP second factor. The secret is encrypted at rest (AES-256-GCM, key
+   * derived from AUTH_SECRET) — see lib/crypto.ts. `twoFactorEnabled` is only
+   * set once the member has proved they can generate a valid code, so a
+   * half-finished setup can never lock anyone out.
+   */
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
+
+  // Which kinds of event this member wants to see in the activity feed.
+  notifyCheckInsDue Boolean @default(true)
+  notifyStaysEnding Boolean @default(true)
+  notifyMissingRate Boolean @default(true)
+
+  // Organization scoping
+  orgId        String
+  organization Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  sentInvitations Invitation[] @relation("InvitationSender")
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+/**
+ * A one-time invitation link. The token is the only credential needed to join,
+ * so it is single-use (`acceptedAt`), expires, and can be revoked — the accept
+ * page refuses a token that is any of those.
+ */
+model Invitation {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  role      Role     @default(MANAGER)
+
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  invitedById String?
+  invitedBy   User?   @relation("InvitationSender", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([orgId])
+  @@index([email])
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  orgId                String             @unique
+  organization         Organization       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  /**
+   * Payment-provider identifiers. Lemon Squeezy is the provider; the names are
+   * deliberately provider-neutral so swapping it later is a code change, not a
+   * data migration. All nullable: an organization sits on the free STARTER tier
+   * from registration and may never have been through a checkout at all.
+   */
+  billingCustomerId     String?            @unique
+  billingSubscriptionId String?            @unique
+  /// Lemon Squeezy variant id of the purchased plan.
+  billingVariantId      String?
+
+  tier                 SubscriptionTier   @default(STARTER)
+  status               SubscriptionStatus @default(ACTIVE)
+
+  // Custom Overrides (For beta users, special enterprise deals, or free passes)
+  maxPropertiesOverride Int?               // Null = use tier default, e.g., 999999 for unlimited
+  hasApiAccessOverride  Boolean?           // Override feature flags manually
+  isLifetimeFree        Boolean            @default(false)
+
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+/**
+ * Idempotency ledger for billing webhooks. Lemon Squeezy retries deliveries and
+ * can deliver the same event more than once, so each event id is recorded and
+ * replays are dropped rather than applied twice.
+ */
+model WebhookEvent {
+  id         String   @id
+  provider   String   @default("lemonsqueezy")
+  type       String
+  receivedAt DateTime @default(now())
+}
+
+model Property {
+  id        String    @id @default(cuid())
+  name      String
+  address   String
+  icalUrl   String?
+  currency  String?   // Overrides Organization.currency for this property
+
+  // Property belongs to Organization now, not individual User
+  orgId     String
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  bookings  Booking[]
+  units     PropertyUnit[]
+  expenses  Expense[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+/**
+ * A bookable sub-unit of a property — a room, a bed, a cabin, a pitch.
+ *
+ * A property with no units is booked whole, which is exactly how every booking
+ * behaved before this model existed: `Booking.unitId` is null and the stay claims
+ * the entire property. Adding units is therefore opt-in per property and needs no
+ * change to the bookings already on it.
+ *
+ * A property with units is booked per unit: two stays in *different* units of the
+ * same property do not conflict, which is the whole point of dividing it up. See
+ * lib/availability.ts for the conflict rule.
+ *
+ * `orgId` is denormalised from the owning property so expense and availability
+ * reads can be scoped by tenant without a join. It is never accepted from a
+ * request — only ever written from a property row that was itself fetched by
+ * `orgId`, so the two cannot disagree.
+ */
+model PropertyUnit {
+  id         String   @id @default(cuid())
+  name       String
+  /** Free-text kind for grouping in the UI: "Room", "Bed", "Cabin". */
+  kind       String?
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  bookings   Booking[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  /// Two units of one property cannot share a name — "Room 1" twice would make
+  /// the booking form's unit picker ambiguous.
+  @@unique([propertyId, name])
+  @@index([orgId])
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  /**
+   * The sub-unit this stay occupies, or null for the whole property.
+   *
+   * Null is the pre-existing behaviour and stays the default: a property nobody
+   * has divided up has exactly one bookable thing, itself.
+   *
+   * `SetNull` rather than `Restrict` so deleting a property cannot trip over the
+   * unit its own bookings point at — those bookings are being cascade-deleted in
+   * the same statement. Deleting a unit *on its own* is refused in the action
+   * layer while bookings reference it, so this never silently widens a booking
+   * into the whole property behind the user's back.
+   */
+  unitId     String?
+  unit       PropertyUnit? @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  guestName  String
+  startDate  DateTime
+  endDate    DateTime
+  source     String   @default("Direct")
+  status     BookingStatus @default(PENDING)
+  /*
+    Total booking value in the smallest currency unit (cents).
+    Nullable on purpose: revenue metrics sum this and skip nulls rather than
+    falling back to an estimate, so an unrecorded rate shows as "—" instead of
+    presenting a fabricated figure as real.
+  */
+  totalAmount Int?
+  createdAt  DateTime @default(now())
+
+  /// Availability scans filter one property to an overlapping date window.
+  @@index([propertyId, startDate, endDate])
+  @@index([unitId])
+}
+
+/**
+ * A cost incurred against a property — maintenance, utilities, supplies.
+ *
+ * `amount` is minor units in the organization's own currency, the same convention
+ * `Booking.totalAmount` uses, so both render through lib/currency.ts and neither
+ * can drift into being read as a different currency than the other.
+ *
+ * The receipt is stored as a private storage key, not a public URL. Receipts name
+ * suppliers and prices and sometimes carry card fragments; a file under `public/`
+ * would be readable by anyone who can guess or be shown the path, with no session
+ * and no tenant check. `receiptPath` names a file outside the served tree that
+ * only /api/receipts/[id] will hand back, after confirming the caller belongs to
+ * this organization. See lib/storage.ts.
+ */
+model Expense {
+  id          String          @id @default(cuid())
+  amount      Int
+  category    ExpenseCategory @default(OTHER)
+  date        DateTime
+  description String
+
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  /** Denormalised from the property, written only from a row already scoped by orgId. */
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  receiptPath String?
+  /** The uploader's own filename, kept for the download prompt and never used as a path. */
+  receiptName String?
+  /** Verified from the file's own bytes on upload, not from the browser's claim. */
+  receiptType String?
+  receiptSize Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId, date])
+  @@index([propertyId, date])
+  /// Serves the storage-cap check, which sums every receipt in one organization
+  /// before accepting an upload. Leading `orgId` scopes it; `receiptSize` makes
+  /// it an index-only scan, so the check costs no heap reads.
+  @@index([orgId, receiptSize])
+}
